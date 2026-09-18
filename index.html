@@ -111,22 +111,6 @@
   .ic svg, .ic-svg{ width:1em; height:1em; display:block; }
   .ic{ display:inline-flex; }
 
-  /* ---------- Focus card (ring + today checklist) ---------- */
-  .focus-card{
-    display:flex; gap:16px; align-items:center; background:var(--beige); border:1px solid var(--border);
-    border-radius:var(--radius); padding:18px; box-shadow: var(--shadow-md);
-  }
-  .focus-card .ring{ flex-shrink:0; }
-  .focus-list{ flex:1; min-width:0; display:flex; flex-direction:column; gap:8px; }
-  .focus-item{ display:flex; align-items:center; gap:10px; font-size:12.5px; color:var(--black); }
-  .focus-item.done .fi-title{ color:var(--taupe); text-decoration:line-through; }
-  .focus-item .fi-title{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .check.sm{ width:16px; height:16px; border-radius:5px; flex-shrink:0; }
-  .check.sm.on::after{ font-size:9px; }
-  .focus-empty{ font-size:12px; color:var(--taupe); }
-  .focus-foot{ font-size:11.5px; color:var(--taupe); margin:12px 0 14px; text-align:center; }
-  .focus-foot b{ color:var(--nude); font-weight:600; }
-
   /* ---------- Clock card (desktop) ---------- */
   .clock-card{
     background:var(--beige); border:1px solid var(--border); border-radius:var(--radius); padding:18px;
@@ -146,13 +130,7 @@
   .fm-dot.in{ background:var(--espresso); }
   .fm-dot.out{ background:var(--nude); }
 
-  /* ---------- Reminders strip ---------- */
-  .reminders-strip{ display:flex; flex-direction:column; gap:10px; margin-top:16px; }
-  .rem-item{
-    display:flex; align-items:center; gap:10px; background:var(--beige); border:1px solid var(--border);
-    border-radius:var(--radius-sm); padding:12px 14px; font-size:12.5px; color:var(--black); box-shadow: var(--shadow-sm);
-  }
-  .rem-item .ic{ color:var(--nude); flex-shrink:0; font-size:15px; }
+  .hero-card.wide{ width:100%; }
   .hero-card.all-done{ background: linear-gradient(135deg, var(--espresso), #8a3a56); }
   header.top{ padding: 22px 2px 4px; }
   .wordmark{ font-family:'DM Serif Display',serif; font-style:italic; font-size:20px; color:#fff; font-weight:400; }
@@ -429,10 +407,11 @@
     .d-dashboard .hero-banner{ margin:0; min-height:180px; }
     .d-top-grid{ display:grid; grid-template-columns: 1.7fr 1fr; gap:14px; align-items:stretch; margin-bottom:14px; }
 
-    .d-focus-grid{ display:grid; grid-template-columns: 1.5fr 1fr; gap:14px; align-items:stretch; margin-bottom:14px; }
-    .d-focus-grid .hero-card{ min-height:0; height:100%; }
+    .d-glance-grid{ display:grid; grid-template-columns: 1.6fr 1fr 1fr; gap:14px; align-items:stretch; margin-bottom:18px; }
+    .d-glance-grid .hero-card{ min-height:0; height:100%; }
+    .d-glance-grid .ring-card{ padding:14px; }
 
-    .d-stats-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-bottom:18px; align-items:stretch; }
+    .d-stats-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-top:18px; align-items:stretch; }
     .d-stats-grid .quote-card{ min-height:0; }
 
     .d-main-grid{ display:grid; grid-template-columns: 1.6fr 1.1fr; gap:18px; align-items:start; }
@@ -528,25 +507,21 @@
   <!-- HEUTE -->
   <section id="tab-heute" class="active">
   <div class="m-dashboard">
-    <div class="focus-card">
-      <div class="ring" id="statTasksRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="statTasksPct">0%</div></div></div>
-      <div class="focus-list" id="focusList"></div>
-    </div>
-    <div class="focus-foot"><b id="statContentNum">0/0</b> Content diese Woche · Disziplin. Konsequenz. Du. <span class="beat">♡</span></div>
-
-    <div class="stat-card goal-list" style="margin-top:14px;">
-      <div class="stat-ic">♡</div>
-      <div class="stat-label" style="margin-top:2px; font-weight:600; color:var(--black);">Ziel des Monats</div>
-      <div id="monthGoalList"></div>
-    </div>
-
-    <div class="hero-row">
-      <div class="hero-card">
-        <div class="h-eyebrow"><span class="ic-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="7.3"/><circle cx="12" cy="12" r="3.6"/><circle cx="12" cy="12" r=".6" fill="currentColor" stroke="none"/></svg></span> HEUTE WICHTIG</div>
-        <div class="h-title" id="heroTitle">—</div>
-        <div class="h-time" id="heroTime"></div>
+    <div class="stats-row">
+      <div class="stat-card ring-card">
+        <div class="ring" id="statTasksRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="statTasksPct">0%</div></div></div>
+        <div class="stat-label">Aufgaben erledigt</div>
       </div>
-      <div class="quote-card"><div class="q-text" id="quoteText">Disziplin ist die Brücke zwischen deinen Zielen und deiner Freiheit.</div></div>
+      <div class="stat-card ring-card">
+        <div class="ring" id="statContentRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="statContentPct">0%</div></div></div>
+        <div class="stat-label">Content diese Woche</div>
+      </div>
+    </div>
+
+    <div class="hero-card wide" style="margin-top:12px;">
+      <div class="h-eyebrow"><span class="ic-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="7.3"/><circle cx="12" cy="12" r="3.6"/><circle cx="12" cy="12" r=".6" fill="currentColor" stroke="none"/></svg></span> HEUTE WICHTIG</div>
+      <div class="h-title" id="heroTitle">—</div>
+      <div class="h-time" id="heroTime"></div>
     </div>
 
     <div class="qc-row">
@@ -560,10 +535,13 @@
     <div class="section-title">Meine Aufgaben heute <span class="all" id="heuteCount"></span></div>
     <div id="todayList"></div>
 
-    <div class="reminders-strip">
-      <div class="rem-item"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2"/></svg></span>Kleine Schritte, große Ergebnisse.</div>
-      <div class="rem-item"><span class="ic">♡</span>Du schaffst das! Sei stolz auf dich.</div>
+    <div class="stat-card goal-list" style="margin-top:16px;">
+      <div class="stat-ic">♡</div>
+      <div class="stat-label" style="margin-top:2px; font-weight:600; color:var(--black);">Ziel des Monats</div>
+      <div id="monthGoalList"></div>
     </div>
+
+    <div class="quote-card" style="margin-top:12px; min-height:0; padding:16px;"><div class="q-text" id="quoteText">Disziplin ist die Brücke zwischen deinen Zielen und deiner Freiheit.</div></div>
   </div><!-- /m-dashboard -->
 
   <div class="d-dashboard">
@@ -583,18 +561,34 @@
       </div>
     </div>
 
-    <div class="d-focus-grid">
-      <div class="focus-card">
-        <div class="ring" id="dStatTasksRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="dStatTasksPct">0%</div></div></div>
-        <div class="focus-list" id="dFocusList"></div>
-      </div>
+    <div class="d-glance-grid">
       <div class="hero-card">
         <div class="h-eyebrow"><span class="ic-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="7.3"/><circle cx="12" cy="12" r="3.6"/><circle cx="12" cy="12" r=".6" fill="currentColor" stroke="none"/></svg></span> HEUTE WICHTIG</div>
         <div class="h-title" id="dHeroTitle">—</div>
         <div class="h-time" id="dHeroTime"></div>
       </div>
+      <div class="stat-card ring-card">
+        <div class="ring" id="dStatTasksRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="dStatTasksPct">0%</div></div></div>
+        <div class="stat-label">Aufgaben erledigt</div>
+      </div>
+      <div class="stat-card ring-card">
+        <div class="ring" id="dStatContentRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="dStatContentPct">0%</div></div></div>
+        <div class="stat-label">Content diese Woche</div>
+      </div>
     </div>
-    <div class="focus-foot"><b id="dStatContentNum">0/0</b> Content diese Woche · Disziplin. Konsequenz. Du. <span class="beat">♡</span></div>
+
+    <div class="d-main-grid">
+      <div class="d-tasks-col">
+        <div class="section-title">
+          <span>Meine Aufgaben heute <span class="all" id="dHeuteCount"></span></span>
+          <span class="dt-add-task" data-quick="task">+ Aufgabe hinzufügen</span>
+        </div>
+        <div id="dTodayList"></div>
+      </div>
+      <div class="d-side-col">
+        <div class="month-cal" id="monthCal"></div>
+      </div>
+    </div>
 
     <div class="d-stats-grid">
       <div class="stat-card goal-list">
@@ -613,23 +607,6 @@
         <div class="stat-label" style="margin-top:12px;">Sparziel-Fortschritt</div>
       </div>
       <div class="quote-card"><div class="q-text" id="dQuoteText">Disziplin ist die Brücke zwischen deinen Zielen und deiner Freiheit.</div></div>
-    </div>
-
-    <div class="d-main-grid">
-      <div class="d-tasks-col">
-        <div class="section-title">
-          <span>Meine Aufgaben heute <span class="all" id="dHeuteCount"></span></span>
-          <span class="dt-add-task" data-quick="task">+ Aufgabe hinzufügen</span>
-        </div>
-        <div id="dTodayList"></div>
-      </div>
-      <div class="d-side-col">
-        <div class="month-cal" id="monthCal"></div>
-        <div class="reminders-strip">
-          <div class="rem-item"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2"/></svg></span>Kleine Schritte, große Ergebnisse.</div>
-          <div class="rem-item"><span class="ic">♡</span>Du schaffst das!</div>
-        </div>
-      </div>
     </div>
   </div>
   </section>
@@ -915,10 +892,6 @@ function prioOrder(p){ return {Hoch:0, Mittel:1, Niedrig:2}[p]; }
 function projOf(key){ return PROJECTS.find(p=>(p.id||p.key)===key) || {name:key}; }
 function isContentProj(projId){ const p = projOf(projId); return /Content-Business|Personal Brand/i.test(p.name||''); }
 
-function focusRow(t){
-  return `<div class="focus-item ${t.done?'done':''}"><div class="check sm ${t.done?'on':''}" data-check="${t.id}"></div><div class="fi-title">${t.title}</div></div>`;
-}
-
 function taskRow(t,i){
   const p = projOf(t.proj);
   return `<div class="task ${t.done?'done':''}" data-id="${t.id}" style="animation-delay:${Math.min(i||0,8)*45}ms">
@@ -952,14 +925,6 @@ function renderHeute(){
   const taskPct = list.length ? Math.round(doneToday/list.length*100) : 0;
   setRing('statTasksRing', 'statTasksPct', taskPct);
 
-  // compact focus checklist (mobile + desktop)
-  const focusTasks = list.slice(0,5);
-  const focusHtml = focusTasks.length ? focusTasks.map(focusRow).join('') : `<div class="focus-empty">Nichts für heute eingetragen.</div>`;
-  const focusList = document.getElementById('focusList');
-  if(focusList) focusList.innerHTML = focusHtml;
-  const dFocusList = document.getElementById('dFocusList');
-  if(dFocusList) dFocusList.innerHTML = focusHtml;
-
   // stat: content-related tasks this week
   const d0w = new Date(selectedDay+"T00:00:00");
   const dow = d0w.getDay(); const mondayOffset = dow===0 ? -6 : 1-dow;
@@ -968,7 +933,6 @@ function renderHeute(){
   const contentTasks = DATA.tasks.filter(t=> wkDates.includes(t.date) && isContentProj(t.proj));
   const contentDone = contentTasks.filter(t=>t.done).length;
   const contentPct = contentTasks.length ? Math.round(contentDone/contentTasks.length*100) : 0;
-  document.getElementById('statContentNum').textContent = `${contentDone}/${contentTasks.length}`;
   setRing('statContentRing', 'statContentPct', contentPct);
 
   // month goals checklist
@@ -986,8 +950,7 @@ function renderHeute(){
   const dTodayList = document.getElementById('dTodayList');
   if(dTodayList) dTodayList.innerHTML = list.length ? list.map((t,i)=>taskRow(t,i)).join('') : `<div class="empty">Für heute ist nichts eingetragen.<br>Tipp: nutze den Button oben.</div>`;
   setRing('dStatTasksRing', 'dStatTasksPct', taskPct);
-  const dStatContentNum = document.getElementById('dStatContentNum');
-  if(dStatContentNum) dStatContentNum.textContent = `${contentDone}/${contentTasks.length}`;
+  setRing('dStatContentRing', 'dStatContentPct', contentPct);
   const dMonthGoalList = document.getElementById('dMonthGoalList');
   if(dMonthGoalList) dMonthGoalList.innerHTML = DATA.monthGoals.map(g=>`
     <div class="mg-item ${g.done?'done':''}" data-mg="${g.id}"><span class="mg-check">${g.done?'✓':''}</span>${g.text}</div>`).join('');
