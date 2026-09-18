@@ -762,16 +762,16 @@
 </div>
 
 <script>
-const PROJECTS = [
-  {key:"content", name:"Content-Business", next:"Content-Kalender planen + 1x wöchentlich Content-Fotos (Do)"},
-  {key:"brand", name:"Personal Brand \"Einfach Anders\"", next:"Content-Pläne für beide Instagram-Accounts trennen"},
-  {key:"frauen", name:"Frauen-Projekt", next:"Erstes Produkt-Thema festlegen"},
-  {key:"kristalia", name:"Kinder-YouTube Kristalia", next:"Charakterbibel fertigstellen"},
-  {key:"musik", name:"Musikprojekt (KI)", next:"3 Track-Ideen produzieren"},
-  {key:"streaming", name:"Streaming / Twitch", next:"Thumbnail-Konzept überarbeiten"},
-  {key:"haushalt", name:"Haushalt & Familie", next:"Tägliche 15–30 Min Slots nutzen"},
-  {key:"foto", name:"Fotografie", status:"Pausiert", next:"Läuft jetzt als Content-Fotos im Content-Business"},
-  {key:"digiprod", name:"Digitale Produkte / KI-Model", next:"KI-Model Konzept entwickeln + erste Bilder generieren"},
+let PROJECTS = [
+  {key:"content", id:"content", name:"Content-Business", next:"Content-Kalender planen + 1x wöchentlich Content-Fotos (Do)"},
+  {key:"brand", id:"brand", name:"Personal Brand \"Einfach Anders\"", next:"Content-Pläne für beide Instagram-Accounts trennen"},
+  {key:"frauen", id:"frauen", name:"Frauen-Projekt", next:"Erstes Produkt-Thema festlegen"},
+  {key:"kristalia", id:"kristalia", name:"Kinder-YouTube Kristalia", next:"Charakterbibel fertigstellen"},
+  {key:"musik", id:"musik", name:"Musikprojekt (KI)", next:"3 Track-Ideen produzieren"},
+  {key:"streaming", id:"streaming", name:"Streaming / Twitch", next:"Thumbnail-Konzept überarbeiten"},
+  {key:"haushalt", id:"haushalt", name:"Haushalt & Familie", next:"Tägliche 15–30 Min Slots nutzen"},
+  {key:"foto", id:"foto", name:"Fotografie", status:"Pausiert", next:"Läuft jetzt als Content-Fotos im Content-Business"},
+  {key:"digiprod", id:"digiprod", name:"Digitale Produkte / KI-Model", next:"KI-Model Konzept entwickeln + erste Bilder generieren"},
 ];
 
 const DEFAULT_TASKS = [
@@ -813,7 +813,7 @@ const IDEA_CATS = ["Reel","TikTok","OF","Business","Song","YouTube","KI","Produk
 const SCRIPT_CATS = ["Reel","TikTok","OnlyFans","BestFans","YouTube","Cam","Sonstiges"];
 
 function loadData(){
-  let raw = localStorage.getItem('bos_data_v10');
+  let raw = localStorage.getItem('bos_data_v11');
   if(raw){ try{ return JSON.parse(raw); }catch(e){} }
   return { tasks: DEFAULT_TASKS, finance: [], ideas: [], scripts: [],
     monthGoals: [
@@ -830,7 +830,36 @@ if(!DATA.monthGoals) DATA.monthGoals = [
   {id:"g2", text:"Mehr Follower", done:false},
   {id:"g3", text:"Mehr Freiheit ♡", done:false}
 ];
-function save(){ localStorage.setItem('bos_data_v10', JSON.stringify(DATA)); }
+function save(){ localStorage.setItem('bos_data_v11', JSON.stringify(DATA)); }
+
+// ---- Notion sync (via serverless proxy at /api/notion, secured with a server-side token) ----
+const NOTION_ENABLED = true;
+let NOTION_GOAL_ID = null;
+function isNotionId(id){ return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id||''); }
+
+async function syncFromNotion(){
+  if(!NOTION_ENABLED) return false;
+  try {
+    const res = await fetch('/api/notion');
+    if(!res.ok) return false;
+    const data = await res.json();
+    if(data.projects && data.projects.length){
+      PROJECTS = data.projects.map(p=>({ id:p.id, key:p.id, name:p.name, next:p.next||'', status:p.status||'Aktiv' }));
+    }
+    if(data.tasks) DATA.tasks = data.tasks.map(t=>({ id:t.id, title:t.title, date:t.date, prio:t.prio, zeit:t.zeit, proj:t.proj, done:t.done }));
+    if(data.ideas) DATA.ideas = data.ideas.map(i=>({ id:i.id, text:i.text, cat:i.cat, date:i.date }));
+    if(data.finance) DATA.finance = data.finance.map(f=>({ id:f.id, title:f.title, typ:f.typ, betrag:f.betrag, date:f.date }));
+    if(data.goal){ DATA.goal = { name:data.goal.name, target:data.goal.target, current:data.goal.current }; NOTION_GOAL_ID = data.goal.id; }
+    save();
+    return true;
+  } catch(e){ console.warn('Notion-Sync fehlgeschlagen, nutze lokale Daten.', e); return false; }
+}
+
+function notionCall(action, payload){
+  if(!NOTION_ENABLED) return;
+  fetch('/api/notion', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action, ...payload }) })
+    .catch(e=>console.warn('Notion-Aktion fehlgeschlagen:', action, e));
+}
 
 const WEEKDAYS = ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
 const WD_SHORT = ["So","Mo","Di","Mi","Do","Fr","Sa"];
@@ -840,14 +869,14 @@ function isoDate(d){
   return `${y}-${m}-${day}`;
 }
 
-const seededDates = [...new Set(DEFAULT_TASKS.map(t=>t.date))].sort();
 let anchorToday, selectedDay, userNavigated = false;
 
 function computeToday(){
   let t = new Date(); t.setHours(0,0,0,0);
   let a = isoDate(t);
   if(!DATA.tasks.some(x=>x.date===a)){
-    a = seededDates.find(d => d >= a) || seededDates[seededDates.length-1];
+    const dates = [...new Set(DATA.tasks.map(x=>x.date))].sort();
+    a = dates.find(d => d >= a) || dates[dates.length-1] || a;
   }
   return a;
 }
@@ -887,7 +916,8 @@ document.getElementById('dSearch').addEventListener('input', (e)=>{
 });
 
 function prioOrder(p){ return {Hoch:0, Mittel:1, Niedrig:2}[p]; }
-function projOf(key){ return PROJECTS.find(p=>p.key===key) || {name:key}; }
+function projOf(key){ return PROJECTS.find(p=>(p.id||p.key)===key) || {name:key}; }
+function isContentProj(projId){ const p = projOf(projId); return /Content-Business|Personal Brand/i.test(p.name||''); }
 
 function taskRow(t,i){
   const p = projOf(t.proj);
@@ -927,7 +957,7 @@ function renderHeute(){
   const dow = d0w.getDay(); const mondayOffset = dow===0 ? -6 : 1-dow;
   const wkStart = new Date(d0w); wkStart.setDate(d0w.getDate()+mondayOffset);
   const wkDates = Array.from({length:7}).map((_,i)=>{ const dd=new Date(wkStart); dd.setDate(wkStart.getDate()+i); return isoDate(dd); });
-  const contentTasks = DATA.tasks.filter(t=> wkDates.includes(t.date) && (t.proj==='content' || t.proj==='brand'));
+  const contentTasks = DATA.tasks.filter(t=> wkDates.includes(t.date) && isContentProj(t.proj));
   const contentDone = contentTasks.filter(t=>t.done).length;
   document.getElementById('statContentNum').textContent = `${contentDone}/${contentTasks.length}`;
   document.getElementById('statContentBar').style.width = contentTasks.length ? Math.round(contentDone/contentTasks.length*100)+'%' : '0%';
@@ -1023,7 +1053,7 @@ function renderWoche(){
 
 function renderProjekte(){
   document.getElementById('projGrid').innerHTML = PROJECTS.map((p,i)=>{
-    const tasks = DATA.tasks.filter(t=>t.proj===p.key);
+    const tasks = DATA.tasks.filter(t=>t.proj===(p.id||p.key));
     const done = tasks.filter(t=>t.done).length;
     const pct = tasks.length ? Math.round(done/tasks.length*100) : 0;
     const status = p.status || "Aktiv";
@@ -1145,15 +1175,15 @@ window.addEventListener('resize', ()=>{ const a = document.querySelector('nav.ta
 
 document.addEventListener('click', (e)=>{
   const chk = e.target.closest('[data-check]');
-  if(chk){ const id=chk.dataset.check; const t=DATA.tasks.find(x=>x.id===id); t.done=!t.done; save(); renderAll(); return; }
+  if(chk){ const id=chk.dataset.check; const t=DATA.tasks.find(x=>x.id===id); t.done=!t.done; save(); renderAll(); if(isNotionId(id)) notionCall('toggleTask',{id, done:t.done}); return; }
   const del = e.target.closest('[data-del]');
-  if(del){ DATA.tasks = DATA.tasks.filter(x=>x.id!==del.dataset.del); save(); renderAll(); return; }
+  if(del){ const id=del.dataset.del; DATA.tasks = DATA.tasks.filter(x=>x.id!==id); save(); renderAll(); if(isNotionId(id)) notionCall('deleteTask',{id}); return; }
   const day = e.target.closest('[data-day]');
   if(day){ selectedDay = day.dataset.day; userNavigated = true; renderWoche(); return; }
   const cat = e.target.closest('[data-cat]');
   if(cat){ selectedCat = cat.dataset.cat; renderIdeen(); return; }
   const delidea = e.target.closest('[data-delidea]');
-  if(delidea){ DATA.ideas = DATA.ideas.filter(x=>x.id!==delidea.dataset.delidea); save(); renderIdeen(); return; }
+  if(delidea){ const id=delidea.dataset.delidea; DATA.ideas = DATA.ideas.filter(x=>x.id!==id); save(); renderIdeen(); if(isNotionId(id)) notionCall('deleteIdea',{id}); return; }
   const scriptcat = e.target.closest('[data-scriptcat]');
   if(scriptcat){ selectedScriptCat = scriptcat.dataset.scriptcat; renderSkripte(); return; }
   const delscript = e.target.closest('[data-delscript]');
@@ -1183,10 +1213,18 @@ document.addEventListener('click', (e)=>{
   }
 });
 
-document.getElementById('ideaInput').addEventListener('keydown', (e)=>{
+document.getElementById('ideaInput').addEventListener('keydown', async (e)=>{
   if(e.key==='Enter' && e.target.value.trim()){
-    DATA.ideas.push({id:'i'+Date.now(), text:e.target.value.trim(), cat:selectedCat, date:isoDate(new Date())});
+    const text = e.target.value.trim(), cat = selectedCat;
     e.target.value='';
+    let id = 'i'+Date.now();
+    if(NOTION_ENABLED){
+      try{
+        const res = await fetch('/api/notion', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'createIdea', text, cat})});
+        const j = await res.json(); if(j.id) id = j.id;
+      } catch(err){ console.warn('Notion-Idee konnte nicht angelegt werden', err); }
+    }
+    DATA.ideas.push({id, text, cat, date:isoDate(new Date())});
     save(); renderIdeen();
   }
 });
@@ -1206,19 +1244,27 @@ document.getElementById('fabAdd').addEventListener('click', ()=>{
 
 function openTaskModal(){
   const sel = document.getElementById('ntProj');
-  sel.innerHTML = PROJECTS.filter(p=>p.status!=='Pausiert').map(p=>`<option value="${p.key}">${p.name}</option>`).join('');
+  sel.innerHTML = PROJECTS.filter(p=>p.status!=='Pausiert').map(p=>`<option value="${p.id||p.key}">${p.name}</option>`).join('');
   document.getElementById('ntDate').value = selectedDay;
   document.getElementById('ntTitle').value = '';
   document.getElementById('taskModalBg').classList.add('show');
 }
 document.getElementById('ntCancel').addEventListener('click', ()=>document.getElementById('taskModalBg').classList.remove('show'));
-document.getElementById('ntSave').addEventListener('click', ()=>{
+document.getElementById('ntSave').addEventListener('click', async ()=>{
   const title = document.getElementById('ntTitle').value.trim();
   if(!title) return;
-  DATA.tasks.push({
-    id:'t'+Date.now(), title, date: document.getElementById('ntDate').value || selectedDay,
-    prio: document.getElementById('ntPrio').value, zeit:"—", proj: document.getElementById('ntProj').value, done:false
-  });
+  const date = document.getElementById('ntDate').value || selectedDay;
+  const prio = document.getElementById('ntPrio').value;
+  const proj = document.getElementById('ntProj').value;
+  const zeit = "—";
+  let id = 't'+Date.now();
+  if(NOTION_ENABLED){
+    try{
+      const res = await fetch('/api/notion', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'createTask', title, date, prio, proj, zeit})});
+      const j = await res.json(); if(j.id) id = j.id;
+    } catch(err){ console.warn('Notion-Aufgabe konnte nicht angelegt werden', err); }
+  }
+  DATA.tasks.push({ id, title, date, prio, zeit, proj, done:false });
   save(); document.getElementById('taskModalBg').classList.remove('show'); renderAll();
 });
 
@@ -1229,17 +1275,28 @@ function openFinModal(){
   document.getElementById('finModalBg').classList.add('show');
 }
 document.getElementById('nfCancel').addEventListener('click', ()=>document.getElementById('finModalBg').classList.remove('show'));
-document.getElementById('nfSave').addEventListener('click', ()=>{
+document.getElementById('nfSave').addEventListener('click', async ()=>{
   const title = document.getElementById('nfTitle').value.trim();
   const betrag = parseFloat(document.getElementById('nfBetrag').value);
   if(!title || isNaN(betrag)) return;
   const typ = document.getElementById('nfTyp').value;
-  DATA.finance.push({id:'f'+Date.now(), title, typ, betrag, date: document.getElementById('nfDate').value});
+  const date = document.getElementById('nfDate').value;
+  let id = 'f'+Date.now();
+  if(NOTION_ENABLED){
+    try{
+      const res = await fetch('/api/notion', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'createFinance', title, typ, betrag, date, goalId: NOTION_GOAL_ID})});
+      const j = await res.json(); if(j.id) id = j.id;
+    } catch(err){ console.warn('Notion-Finanzeintrag konnte nicht angelegt werden', err); }
+  }
+  DATA.finance.push({id, title, typ, betrag, date});
   if(typ==='Sparen'){ DATA.goal.current += betrag; }
   save(); document.getElementById('finModalBg').classList.remove('show'); renderAll();
 });
 
 renderAll();
+syncFromNotion().then(ok=>{
+  if(ok){ anchorToday = undefined; refreshToday(false); renderAll(); }
+});
 </script>
 </body>
 </html>
