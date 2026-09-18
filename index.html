@@ -96,6 +96,32 @@
   }
   .ring-pct{ font-family:'DM Serif Display',serif; font-size:16px; color:var(--black); }
   .ring-card .stat-label{ margin-top:10px; }
+  .ring.sm{ width:52px; height:52px; box-shadow:0 0 14px rgba(224,104,143,.2); }
+  .ring.sm .ring-inner{ width:38px; height:38px; }
+  .ring.sm .ring-pct{ font-size:10.5px; }
+
+  /* ---------- Glance row (compact at-a-glance tiles) ---------- */
+  .glance-row{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
+  .glance-tile{
+    background:var(--white); border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:12px 8px; display:flex; flex-direction:column; align-items:center; gap:8px; box-shadow: var(--shadow-sm);
+  }
+  .glance-label{ font-size:10px; color:var(--taupe); text-transform:uppercase; letter-spacing:.3px; }
+  .glance-num{ font-family:'DM Serif Display',serif; font-size:20px; color:var(--nude); }
+
+  /* ---------- Secondary block (lighter, non-urgent info) ---------- */
+  .secondary-block{
+    background:var(--beige); border:1px solid var(--border); border-radius:var(--radius);
+    padding:16px; margin-top:16px; display:flex; flex-direction:column; gap:14px;
+  }
+  .sec-block + .sec-block{ padding-top:14px; border-top:1px solid var(--border); }
+  .sec-label{ font-size:10.5px; color:var(--taupe); text-transform:uppercase; letter-spacing:.4px; margin-bottom:8px; font-weight:600; display:flex; align-items:center; gap:6px; }
+  .q-text-mini{ font-family:'DM Serif Display',serif; font-style:italic; font-size:14px; color:var(--nude); text-align:center; line-height:1.4; }
+
+  /* ---------- Desktop two-pane: feed + persistent rail ---------- */
+  .d-feed{ min-width:0; }
+  .d-rail{ display:flex; flex-direction:column; gap:16px; }
+  .rail-rings{ display:flex; justify-content:space-around; padding:16px; }
   .stat-sub{ font-size:11px; color:var(--mocha); margin-top:2px; font-weight:600; }
 
   /* ---------- Script flourish (name emphasis) ---------- */
@@ -404,19 +430,15 @@
     .dt-user-text .dt-name{ font-size:13.5px; font-weight:600; color:var(--espresso); }
     .dt-user-text .dt-sub{ font-size:11px; color:var(--taupe); }
 
-    .d-dashboard .hero-banner{ margin:0; min-height:180px; }
-    .d-top-grid{ display:grid; grid-template-columns: 1.7fr 1fr; gap:14px; align-items:stretch; margin-bottom:14px; }
-
-    .d-glance-grid{ display:grid; grid-template-columns: 1.6fr 1fr 1fr; gap:14px; align-items:stretch; margin-bottom:18px; }
-    .d-glance-grid .hero-card{ min-height:0; height:100%; }
-    .d-glance-grid .ring-card{ padding:14px; }
-
-    .d-stats-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-top:18px; align-items:stretch; }
-    .d-stats-grid .quote-card{ min-height:0; }
-
-    .d-main-grid{ display:grid; grid-template-columns: 1.6fr 1.1fr; gap:18px; align-items:start; }
+    .d-dashboard{ display:flex; gap:24px; align-items:flex-start; }
+    .d-feed{ flex:1; min-width:0; }
+    .d-rail{ width:288px; flex-shrink:0; }
+    .d-dashboard .hero-banner{ margin:0 0 14px; min-height:170px; }
+    .d-feed .hero-card.wide{ margin-bottom:14px; }
     .d-tasks-col .section-title{ display:flex; align-items:center; }
     .dt-add-task{ font-size:11.5px; background:var(--espresso); color:var(--on-accent); padding:8px 15px; border-radius:20px; cursor:pointer; font-weight:600; white-space:nowrap; }
+    .d-rail .quote-card{ min-height:0; padding:16px; }
+    .d-rail .fin-mini{ padding:16px; }
 
     .month-cal{ background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow: var(--shadow-sm); }
     .mc-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
@@ -507,14 +529,18 @@
   <!-- HEUTE -->
   <section id="tab-heute" class="active">
   <div class="m-dashboard">
-    <div class="stats-row">
-      <div class="stat-card ring-card">
-        <div class="ring" id="statTasksRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="statTasksPct">0%</div></div></div>
-        <div class="stat-label">Aufgaben erledigt</div>
+    <div class="glance-row">
+      <div class="glance-tile">
+        <div class="ring sm" id="statTasksRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="statTasksPct">0%</div></div></div>
+        <div class="glance-label">Aufgaben</div>
       </div>
-      <div class="stat-card ring-card">
-        <div class="ring" id="statContentRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="statContentPct">0%</div></div></div>
-        <div class="stat-label">Content diese Woche</div>
+      <div class="glance-tile">
+        <div class="ring sm" id="statContentRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="statContentPct">0%</div></div></div>
+        <div class="glance-label">Content</div>
+      </div>
+      <div class="glance-tile">
+        <div class="glance-num" id="statGoalsNum">0/3</div>
+        <div class="glance-label">Ziele</div>
       </div>
     </div>
 
@@ -535,17 +561,19 @@
     <div class="section-title">Meine Aufgaben heute <span class="all" id="heuteCount"></span></div>
     <div id="todayList"></div>
 
-    <div class="stat-card goal-list" style="margin-top:16px;">
-      <div class="stat-ic">♡</div>
-      <div class="stat-label" style="margin-top:2px; font-weight:600; color:var(--black);">Ziel des Monats</div>
-      <div id="monthGoalList"></div>
+    <div class="secondary-block">
+      <div class="sec-block">
+        <div class="sec-label">♡ Ziel des Monats</div>
+        <div id="monthGoalList"></div>
+      </div>
+      <div class="sec-block">
+        <div class="q-text-mini" id="quoteText">Disziplin ist die Brücke zwischen deinen Zielen und deiner Freiheit.</div>
+      </div>
     </div>
-
-    <div class="quote-card" style="margin-top:12px; min-height:0; padding:16px;"><div class="q-text" id="quoteText">Disziplin ist die Brücke zwischen deinen Zielen und deiner Freiheit.</div></div>
   </div><!-- /m-dashboard -->
 
   <div class="d-dashboard">
-    <div class="d-top-grid">
+    <div class="d-feed">
       <div class="hero-banner">
         <div class="hero-glow"></div>
         <div class="hero-banner-content">
@@ -555,29 +583,13 @@
           <div class="hero-pill">Du schaffst das! <span class="beat">♡</span></div>
         </div>
       </div>
-      <div class="clock-card">
-        <div class="clock-time" id="clockTime">--:--</div>
-        <div class="clock-date" id="clockDate"></div>
-      </div>
-    </div>
 
-    <div class="d-glance-grid">
-      <div class="hero-card">
+      <div class="hero-card wide">
         <div class="h-eyebrow"><span class="ic-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="7.3"/><circle cx="12" cy="12" r="3.6"/><circle cx="12" cy="12" r=".6" fill="currentColor" stroke="none"/></svg></span> HEUTE WICHTIG</div>
         <div class="h-title" id="dHeroTitle">—</div>
         <div class="h-time" id="dHeroTime"></div>
       </div>
-      <div class="stat-card ring-card">
-        <div class="ring" id="dStatTasksRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="dStatTasksPct">0%</div></div></div>
-        <div class="stat-label">Aufgaben erledigt</div>
-      </div>
-      <div class="stat-card ring-card">
-        <div class="ring" id="dStatContentRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="dStatContentPct">0%</div></div></div>
-        <div class="stat-label">Content diese Woche</div>
-      </div>
-    </div>
 
-    <div class="d-main-grid">
       <div class="d-tasks-col">
         <div class="section-title">
           <span>Meine Aufgaben heute <span class="all" id="dHeuteCount"></span></span>
@@ -585,17 +597,28 @@
         </div>
         <div id="dTodayList"></div>
       </div>
-      <div class="d-side-col">
-        <div class="month-cal" id="monthCal"></div>
-      </div>
     </div>
 
-    <div class="d-stats-grid">
+    <aside class="d-rail">
+      <div class="stat-card rail-rings">
+        <div class="glance-tile" style="background:none; border:none; box-shadow:none; padding:0;">
+          <div class="ring sm" id="dStatTasksRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="dStatTasksPct">0%</div></div></div>
+          <div class="glance-label">Aufgaben</div>
+        </div>
+        <div class="glance-tile" style="background:none; border:none; box-shadow:none; padding:0;">
+          <div class="ring sm" id="dStatContentRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="dStatContentPct">0%</div></div></div>
+          <div class="glance-label">Content</div>
+        </div>
+      </div>
+
+      <div class="month-cal" id="monthCal"></div>
+
       <div class="stat-card goal-list">
         <div class="stat-ic">♡</div>
         <div class="stat-label" style="margin-top:2px; font-weight:600; color:var(--black);">Ziel des Monats</div>
         <div id="dMonthGoalList"></div>
       </div>
+
       <div class="stat-card fin-mini">
         <div class="fin-mini-top">
           <div class="ring" id="dFinRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="dFinPct">0%</div></div></div>
@@ -606,8 +629,9 @@
         </div>
         <div class="stat-label" style="margin-top:12px;">Sparziel-Fortschritt</div>
       </div>
+
       <div class="quote-card"><div class="q-text" id="dQuoteText">Disziplin ist die Brücke zwischen deinen Zielen und deiner Freiheit.</div></div>
-    </div>
+    </aside>
   </div>
   </section>
 
@@ -938,6 +962,9 @@ function renderHeute(){
   // month goals checklist
   document.getElementById('monthGoalList').innerHTML = DATA.monthGoals.map(g=>`
     <div class="mg-item ${g.done?'done':''}" data-mg="${g.id}"><span class="mg-check">${g.done?'✓':''}</span>${g.text}</div>`).join('');
+  const goalsDone = DATA.monthGoals.filter(g=>g.done).length;
+  const statGoalsNum = document.getElementById('statGoalsNum');
+  if(statGoalsNum) statGoalsNum.textContent = `${goalsDone}/${DATA.monthGoals.length}`;
 
   // ---- desktop dashboard mirrors ----
   const dEls = {
