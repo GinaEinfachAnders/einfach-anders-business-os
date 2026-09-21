@@ -896,7 +896,8 @@ function renderHeute(){
   const list = DATA.tasks.filter(t=>t.date===selectedDay).sort((a,b)=>prioOrder(a.prio)-prioOrder(b.prio));
   const main = list.find(t=>!t.done) || list[0];
   document.getElementById('heroTitle').textContent = main ? main.title : "Alles erledigt 🎉";
-  document.getElementById('heroTime').textContent = main ? (projOf(main.proj).name + " · " + main.zeit) : "Genieß den freien Kopf.";
+  const mainMeta = main ? [projOf(main.proj).name, main.zeit].filter(Boolean).join(' · ') : "Genieß den freien Kopf.";
+  document.getElementById('heroTime').textContent = mainMeta;
   const openCount = list.filter(t=>!t.done).length;
   document.getElementById('heuteCount').textContent = list.length ? `${openCount} offen von ${list.length}` : "";
   const dateObj = new Date(selectedDay+"T00:00:00");
@@ -936,7 +937,7 @@ function renderHeute(){
   const dEls = {
     dMetaline: document.getElementById('metaline').textContent,
     dHeroTitle: main ? main.title : "Alles erledigt 🎉",
-    dHeroTime: main ? (projOf(main.proj).name + " · " + main.zeit) : "Genieß den freien Kopf.",
+    dHeroTime: mainMeta,
     dHeuteCount: list.length ? `${openCount} offen von ${list.length}` : "",
     dStatTasksFrac: tasksFrac,
     dStatGoalsNum: goalsFrac,
