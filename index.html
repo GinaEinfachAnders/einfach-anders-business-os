@@ -72,16 +72,9 @@
     color:#fff; font-size:12.5px; font-weight:600; backdrop-filter: blur(4px);
   }
 
-  /* ---------- Stats row ---------- */
-  .stats-row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:6px; }
-  .stat-card{ background:var(--white); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; box-shadow: var(--shadow-sm); }
-  .stat-ic{ width:30px; height:30px; border-radius:9px; background:var(--beige); display:flex; align-items:center; justify-content:center; font-size:13px; margin-bottom:9px; }
-  .stat-num{ font-family:'DM Serif Display',serif; font-size:20px; color:var(--espresso); }
-  .stat-label{ font-size:11px; color:var(--taupe); margin-top:2px; }
   .bar-track.sm{ height:5px; margin-top:9px; }
 
   /* ---------- Ring / donut progress ---------- */
-  .ring-card{ display:flex; flex-direction:column; align-items:center; text-align:center; padding:16px 10px; }
   .ring{
     --pct: 0;
     width:84px; height:84px; border-radius:50%;
@@ -95,19 +88,31 @@
     display:flex; align-items:center; justify-content:center;
   }
   .ring-pct{ font-family:'DM Serif Display',serif; font-size:16px; color:var(--black); }
-  .ring-card .stat-label{ margin-top:10px; }
   .ring.sm{ width:52px; height:52px; box-shadow:0 0 14px rgba(224,104,143,.2); }
   .ring.sm .ring-inner{ width:38px; height:38px; }
   .ring.sm .ring-pct{ font-size:10.5px; }
+  .ring.lg{ width:104px; height:104px; box-shadow:0 0 30px rgba(224,104,143,.24); }
+  .ring.lg .ring-inner{ width:80px; height:80px; }
+  .ring.lg .ring-pct{ font-size:20px; }
+  .ring-sub{ font-size:9.5px; color:var(--taupe); margin-top:1px; }
 
-  /* ---------- Glance row (compact at-a-glance tiles) ---------- */
-  .glance-row{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
-  .glance-tile{
-    background:var(--white); border:1px solid var(--border); border-radius:var(--radius-sm);
-    padding:12px 8px; display:flex; flex-direction:column; align-items:center; gap:8px; box-shadow: var(--shadow-sm);
+  /* ---------- Today hero: one dominant ring + plain-text stat rows ---------- */
+  .today-hero{ display:flex; align-items:center; gap:20px; padding:8px 2px 4px; }
+  .today-hero-meta{ flex:1; min-width:0; display:flex; flex-direction:column; gap:12px; }
+  .thm-row{ display:flex; justify-content:space-between; align-items:baseline; font-size:12.5px; color:var(--taupe); border-bottom:1px solid var(--border); padding-bottom:10px; }
+  .thm-row:last-child{ border-bottom:none; padding-bottom:0; }
+  .thm-row b{ color:var(--black); font-family:'DM Serif Display',serif; font-size:16px; font-weight:400; }
+
+  /* ---------- Important banner: solid accent, visually distinct from every other panel ---------- */
+  .important-banner{
+    background: linear-gradient(120deg, var(--espresso) 0%, #9c4a68 100%);
+    border-radius: var(--radius); padding:18px 20px; margin-top:16px; color:var(--on-accent);
+    box-shadow: 0 16px 34px -18px rgba(224,104,143,.5);
   }
-  .glance-label{ font-size:10px; color:var(--taupe); text-transform:uppercase; letter-spacing:.3px; }
-  .glance-num{ font-family:'DM Serif Display',serif; font-size:20px; color:var(--nude); }
+  .ib-eyebrow{ font-size:11px; letter-spacing:.6px; text-transform:uppercase; opacity:.7; font-weight:700; display:flex; align-items:center; gap:7px; }
+  .ib-eyebrow svg{ width:14px; height:14px; }
+  .ib-title{ font-size:17px; font-weight:600; line-height:1.35; margin-top:9px; }
+  .ib-time{ font-size:12px; opacity:.68; margin-top:8px; }
 
   /* ---------- Secondary block (lighter, non-urgent info) ---------- */
   .secondary-block{
@@ -121,12 +126,13 @@
   /* ---------- Desktop two-pane: feed + persistent rail ---------- */
   .d-feed{ min-width:0; }
   .d-rail{ display:flex; flex-direction:column; gap:16px; }
-  .rail-rings{ display:flex; justify-content:space-around; padding:16px; }
-  .stat-sub{ font-size:11px; color:var(--mocha); margin-top:2px; font-weight:600; }
+  .overview-panel{ background:var(--beige); border:1px solid var(--border); border-radius:var(--radius); padding:18px; display:flex; flex-direction:column; gap:16px; box-shadow: var(--shadow-sm); }
+  .ov-divider{ height:1px; background:var(--border); }
+  .ov-label{ font-size:10.5px; color:var(--taupe); text-transform:uppercase; letter-spacing:.4px; font-weight:600; margin-bottom:10px; }
+  .ov-fin{ display:flex; align-items:center; gap:14px; margin-top:6px; }
 
   /* ---------- Script flourish (name emphasis) ---------- */
   .script-name{ font-family:'Alex Brush', cursive; font-size:1.5em; color: var(--nude); vertical-align:-0.12em; line-height:1; }
-  .goal-list{ display:flex; flex-direction:column; }
   #monthGoalList{ margin-top:8px; display:flex; flex-direction:column; gap:6px; }
   .mg-item{ display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--black); cursor:pointer; }
   .mg-item .mg-check{ width:14px; height:14px; border-radius:4px; border:1.5px solid var(--border-strong); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--on-accent); }
@@ -137,18 +143,7 @@
   .ic svg, .ic-svg{ width:1em; height:1em; display:block; }
   .ic{ display:inline-flex; }
 
-  /* ---------- Clock card (desktop) ---------- */
-  .clock-card{
-    background:var(--beige); border:1px solid var(--border); border-radius:var(--radius); padding:18px;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow: var(--shadow-sm);
-  }
-  .clock-time{ font-family:'DM Serif Display',serif; font-size:32px; color:var(--black); letter-spacing:.5px; }
-  .clock-date{ font-size:11.5px; color:var(--taupe); margin-top:6px; text-transform:uppercase; letter-spacing:.4px; text-align:center; }
-
-  /* ---------- Finance mini card (desktop) ---------- */
-  .fin-mini{ display:flex; flex-direction:column; }
-  .fin-mini-top{ display:flex; align-items:center; gap:14px; }
-  .fin-mini-top .ring{ flex-shrink:0; }
+  /* ---------- Finance mini legend ---------- */
   .fm-legend{ flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; }
   .fm-row{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--taupe); }
   .fm-row b{ margin-left:auto; color:var(--black); font-weight:600; }
@@ -156,8 +151,6 @@
   .fm-dot.in{ background:var(--espresso); }
   .fm-dot.out{ background:var(--nude); }
 
-  .hero-card.wide{ width:100%; }
-  .hero-card.all-done{ background: linear-gradient(135deg, var(--espresso), #8a3a56); }
   header.top{ padding: 22px 2px 4px; }
   .wordmark{ font-family:'DM Serif Display',serif; font-style:italic; font-size:20px; color:#fff; font-weight:400; }
   .greet{ font-size: 26px; font-weight:400; line-height:1.2; margin-top:8px; color:#fff; }
@@ -168,25 +161,7 @@
   section.active{ display:block; animation: fade .2s ease; }
   @keyframes fade{ from{opacity:0;} to{opacity:1;} }
 
-  .hero-row{ display:flex; gap:10px; margin-top:16px; }
-  .hero-card{
-    box-shadow: var(--shadow-md);
-    flex:1.3; background: var(--beige); border:1px solid var(--border); color: var(--black);
-    border-radius: var(--radius); padding: 18px;
-    display:flex; flex-direction:column; justify-content:space-between; min-height: 122px;
-  }
-  .hero-card .h-eyebrow{ display:flex; align-items:center; gap:8px; font-size:11px; letter-spacing:.5px; color: var(--nude); text-transform:uppercase; }
-  .h-eyebrow .ic-circle{ width:22px; height:22px; border-radius:50%; background: var(--nude-soft); display:flex; align-items:center; justify-content:center; font-size:12px; }
-  .h-eyebrow .ic-circle svg{ width:1em; height:1em; display:block; }
-  .hero-card .h-title{ font-size:16.5px; font-weight:500; line-height:1.35; margin-top:10px; }
-  .hero-card .h-time{ font-size:12px; color: var(--taupe); margin-top:10px; }
-
-  .quote-card{
-    flex:1; background: var(--white); border:1px solid var(--border); border-radius: var(--radius); padding:16px;
-    display:flex; align-items:center; justify-content:center; text-align:center;
-    min-height: 122px; box-shadow: var(--shadow-sm);
-  }
-  .quote-card .q-text{ font-family:'DM Serif Display',serif; font-style:italic; font-size:16.5px; line-height:1.35; color: var(--espresso); font-weight:400; }
+  .important-banner.all-done{ background: linear-gradient(120deg, #3d6b52, #5e9678); }
 
   .qc-row{ display:flex; gap:8px; margin-top:16px; overflow-x:auto; padding-bottom:2px; }
   .qc-btn{
@@ -206,33 +181,28 @@
   .section-title .all{ font-size:11.5px; color: var(--taupe); font-weight:500; text-transform:none; letter-spacing:0; }
 
   .task{
-    display:flex; align-items:flex-start; gap:12px;
-    background: var(--white); border: 1px solid var(--border); border-left:3px solid transparent;
-    border-radius: var(--radius-sm); padding: 13px 14px; margin-bottom: 8px;
-    box-shadow: var(--shadow-sm); transition: box-shadow .15s ease, border-color .15s ease;
+    display:flex; align-items:flex-start; gap:14px;
+    background:none; border:none; border-bottom: 1px solid var(--border);
+    border-radius: 0; padding: 15px 2px; margin-bottom: 0;
+    box-shadow:none; transition: opacity .15s ease;
   }
-  .task:hover{ box-shadow: var(--shadow-md); }
-  .task:has(.prio.Hoch){ border-left-color: var(--nude); }
-  .task:has(.prio.Mittel){ border-left-color: var(--mocha); }
-  .task:has(.prio.Niedrig){ border-left-color: var(--border-strong); }
-  .task.done{ opacity:.5; }
+  .task.done{ opacity:.4; }
   .task.done .t-title{ text-decoration: line-through; }
   .check{
-    width:21px; height:21px; border-radius:7px; flex-shrink:0; margin-top:1px;
+    width:20px; height:20px; border-radius:6px; flex-shrink:0; margin-top:2px;
     border: 1.5px solid var(--border-strong); display:flex; align-items:center; justify-content:center; cursor:pointer;
   }
   .check.on{ background: var(--espresso); border-color: var(--espresso); }
   .check.on::after{ content:"✓"; font-size:12px; color:var(--on-accent); font-weight:700; }
   .t-body{ flex:1; min-width:0; }
-  .t-title{ font-size:14px; font-weight:500; line-height:1.4; }
-  .t-meta{ display:flex; gap:8px; align-items:center; margin-top:8px; justify-content:space-between; }
-  .chip{ font-size:10.5px; color: var(--mocha); background: var(--beige); padding:3px 9px; border-radius:20px; }
-  .prio{ font-size:11px; display:flex; align-items:center; gap:5px; color: var(--taupe); flex-shrink:0; font-weight:500; }
-  .prio .pdot{ width:6px; height:6px; border-radius:50%; }
+  .t-title{ font-size:14.5px; font-weight:500; line-height:1.4; }
+  .t-meta{ display:flex; gap:10px; align-items:center; margin-top:6px; }
+  .chip{ font-size:11.5px; color: var(--taupe); }
+  .chip::before{ content:"·"; margin-right:10px; color:var(--border-strong); }
+  .prio{ font-size:11px; font-weight:600; flex-shrink:0; letter-spacing:.2px; }
   .prio.Hoch{ color: var(--nude); }
-  .prio.Hoch .pdot{ background: var(--nude); }
-  .prio.Mittel .pdot{ background: var(--mocha); }
-  .prio.Niedrig .pdot{ background: var(--taupe); }
+  .prio.Mittel{ color: var(--mocha); }
+  .prio.Niedrig{ color: var(--taupe); }
   .del{ color: var(--taupe); font-size:18px; padding:2px 2px; cursor:pointer; flex-shrink:0; }
 
   .empty{ text-align:center; color: var(--taupe); padding: 30px 10px; font-size:14px; }
@@ -434,11 +404,9 @@
     .d-feed{ flex:1; min-width:0; }
     .d-rail{ width:288px; flex-shrink:0; }
     .d-dashboard .hero-banner{ margin:0 0 14px; min-height:170px; }
-    .d-feed .hero-card.wide{ margin-bottom:14px; }
+    .d-feed .important-banner{ margin-bottom:14px; }
     .d-tasks-col .section-title{ display:flex; align-items:center; }
     .dt-add-task{ font-size:11.5px; background:var(--espresso); color:var(--on-accent); padding:8px 15px; border-radius:20px; cursor:pointer; font-weight:600; white-space:nowrap; }
-    .d-rail .quote-card{ min-height:0; padding:16px; }
-    .d-rail .fin-mini{ padding:16px; }
 
     .month-cal{ background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow: var(--shadow-sm); }
     .mc-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
@@ -529,25 +497,18 @@
   <!-- HEUTE -->
   <section id="tab-heute" class="active">
   <div class="m-dashboard">
-    <div class="glance-row">
-      <div class="glance-tile">
-        <div class="ring sm" id="statTasksRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="statTasksPct">0%</div></div></div>
-        <div class="glance-label">Aufgaben</div>
-      </div>
-      <div class="glance-tile">
-        <div class="ring sm" id="statContentRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="statContentPct">0%</div></div></div>
-        <div class="glance-label">Content</div>
-      </div>
-      <div class="glance-tile">
-        <div class="glance-num" id="statGoalsNum">0/3</div>
-        <div class="glance-label">Ziele</div>
+    <div class="today-hero">
+      <div class="ring lg" id="statTasksRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="statTasksPct">0%</div><div class="ring-sub" id="statTasksFrac">0/0</div></div></div>
+      <div class="today-hero-meta">
+        <div class="thm-row"><span>Content diese Woche</span><b id="statContentPct">0%</b></div>
+        <div class="thm-row"><span>Ziele diesen Monat</span><b id="statGoalsNum">0/3</b></div>
       </div>
     </div>
 
-    <div class="hero-card wide" style="margin-top:12px;">
-      <div class="h-eyebrow"><span class="ic-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="7.3"/><circle cx="12" cy="12" r="3.6"/><circle cx="12" cy="12" r=".6" fill="currentColor" stroke="none"/></svg></span> HEUTE WICHTIG</div>
-      <div class="h-title" id="heroTitle">—</div>
-      <div class="h-time" id="heroTime"></div>
+    <div class="important-banner">
+      <div class="ib-eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="7.3"/><circle cx="12" cy="12" r="3.6"/><circle cx="12" cy="12" r=".6" fill="currentColor" stroke="none"/></svg> HEUTE WICHTIG</div>
+      <div class="ib-title" id="heroTitle">—</div>
+      <div class="ib-time" id="heroTime"></div>
     </div>
 
     <div class="qc-row">
@@ -584,10 +545,18 @@
         </div>
       </div>
 
-      <div class="hero-card wide">
-        <div class="h-eyebrow"><span class="ic-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="7.3"/><circle cx="12" cy="12" r="3.6"/><circle cx="12" cy="12" r=".6" fill="currentColor" stroke="none"/></svg></span> HEUTE WICHTIG</div>
-        <div class="h-title" id="dHeroTitle">—</div>
-        <div class="h-time" id="dHeroTime"></div>
+      <div class="today-hero">
+        <div class="ring lg" id="dStatTasksRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="dStatTasksPct">0%</div><div class="ring-sub" id="dStatTasksFrac">0/0</div></div></div>
+        <div class="today-hero-meta">
+          <div class="thm-row"><span>Content diese Woche</span><b id="dStatContentPct">0%</b></div>
+          <div class="thm-row"><span>Ziele diesen Monat</span><b id="dStatGoalsNum">0/3</b></div>
+        </div>
+      </div>
+
+      <div class="important-banner">
+        <div class="ib-eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="7.3"/><circle cx="12" cy="12" r="3.6"/><circle cx="12" cy="12" r=".6" fill="currentColor" stroke="none"/></svg> HEUTE WICHTIG</div>
+        <div class="ib-title" id="dHeroTitle">—</div>
+        <div class="ib-time" id="dHeroTime"></div>
       </div>
 
       <div class="d-tasks-col">
@@ -600,37 +569,29 @@
     </div>
 
     <aside class="d-rail">
-      <div class="stat-card rail-rings">
-        <div class="glance-tile" style="background:none; border:none; box-shadow:none; padding:0;">
-          <div class="ring sm" id="dStatTasksRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="dStatTasksPct">0%</div></div></div>
-          <div class="glance-label">Aufgaben</div>
-        </div>
-        <div class="glance-tile" style="background:none; border:none; box-shadow:none; padding:0;">
-          <div class="ring sm" id="dStatContentRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="dStatContentPct">0%</div></div></div>
-          <div class="glance-label">Content</div>
-        </div>
-      </div>
-
       <div class="month-cal" id="monthCal"></div>
 
-      <div class="stat-card goal-list">
-        <div class="stat-ic">♡</div>
-        <div class="stat-label" style="margin-top:2px; font-weight:600; color:var(--black);">Ziel des Monats</div>
-        <div id="dMonthGoalList"></div>
-      </div>
-
-      <div class="stat-card fin-mini">
-        <div class="fin-mini-top">
-          <div class="ring" id="dFinRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="dFinPct">0%</div></div></div>
-          <div class="fm-legend">
-            <div class="fm-row"><span class="fm-dot in"></span>Einnahmen<b id="dFinInMini">0 €</b></div>
-            <div class="fm-row"><span class="fm-dot out"></span>Ausgaben<b id="dFinOutMini">0 €</b></div>
+      <div class="overview-panel">
+        <div class="ov-section">
+          <div class="ov-label">♡ Ziel des Monats</div>
+          <div id="dMonthGoalList"></div>
+        </div>
+        <div class="ov-divider"></div>
+        <div class="ov-section">
+          <div class="ov-label">Sparziel-Fortschritt</div>
+          <div class="ov-fin">
+            <div class="ring sm" id="dFinRing" style="--pct:0"><div class="ring-inner"><div class="ring-pct" id="dFinPct">0%</div></div></div>
+            <div class="fm-legend">
+              <div class="fm-row"><span class="fm-dot in"></span>Einnahmen<b id="dFinInMini">0 €</b></div>
+              <div class="fm-row"><span class="fm-dot out"></span>Ausgaben<b id="dFinOutMini">0 €</b></div>
+            </div>
           </div>
         </div>
-        <div class="stat-label" style="margin-top:12px;">Sparziel-Fortschritt</div>
+        <div class="ov-divider"></div>
+        <div class="ov-section">
+          <div class="q-text-mini" id="dQuoteText">Disziplin ist die Brücke zwischen deinen Zielen und deiner Freiheit.</div>
+        </div>
       </div>
-
-      <div class="quote-card"><div class="q-text" id="dQuoteText">Disziplin ist die Brücke zwischen deinen Zielen und deiner Freiheit.</div></div>
     </aside>
   </div>
   </section>
@@ -918,13 +879,13 @@ function isContentProj(projId){ const p = projOf(projId); return /Content-Busine
 
 function taskRow(t,i){
   const p = projOf(t.proj);
-  return `<div class="task ${t.done?'done':''}" data-id="${t.id}" style="animation-delay:${Math.min(i||0,8)*45}ms">
+  return `<div class="task ${t.done?'done':''}" data-id="${t.id}">
     <div class="check ${t.done?'on':''}" data-check="${t.id}"></div>
     <div class="t-body">
       <div class="t-title">${t.title}</div>
       <div class="t-meta">
-        <span class="chip">${p.name}</span>
-        <span class="prio ${t.prio}"><span class="pdot"></span>${t.prio}</span>
+        <span class="prio ${t.prio}">${t.prio}</span>
+        ${p.name ? `<span class="chip">${p.name}</span>` : ''}
       </div>
     </div>
     <div class="del" data-del="${t.id}">⋮</div>
@@ -942,7 +903,8 @@ function renderHeute(){
   document.getElementById('metaline').textContent = fmtDateLong(dateObj) + "  ·  " + list.length + " Aufgaben";
   const wrap = document.getElementById('todayList');
   wrap.innerHTML = list.length ? list.map((t,i)=>taskRow(t,i)).join('') : `<div class="empty">Für heute ist nichts eingetragen.<br>Tipp: nutze den + Button.</div>`;
-  document.querySelector('.hero-card').classList.toggle('all-done', list.length>0 && openCount===0);
+  const banner = document.querySelector('.important-banner');
+  if(banner) banner.classList.toggle('all-done', list.length>0 && openCount===0);
 
   // stat: today's tasks done ratio
   const doneToday = list.filter(t=>t.done).length;
@@ -963,8 +925,12 @@ function renderHeute(){
   document.getElementById('monthGoalList').innerHTML = DATA.monthGoals.map(g=>`
     <div class="mg-item ${g.done?'done':''}" data-mg="${g.id}"><span class="mg-check">${g.done?'✓':''}</span>${g.text}</div>`).join('');
   const goalsDone = DATA.monthGoals.filter(g=>g.done).length;
+  const goalsFrac = `${goalsDone}/${DATA.monthGoals.length}`;
   const statGoalsNum = document.getElementById('statGoalsNum');
-  if(statGoalsNum) statGoalsNum.textContent = `${goalsDone}/${DATA.monthGoals.length}`;
+  if(statGoalsNum) statGoalsNum.textContent = goalsFrac;
+  const tasksFrac = `${doneToday}/${list.length}`;
+  const statTasksFrac = document.getElementById('statTasksFrac');
+  if(statTasksFrac) statTasksFrac.textContent = tasksFrac;
 
   // ---- desktop dashboard mirrors ----
   const dEls = {
@@ -972,6 +938,8 @@ function renderHeute(){
     dHeroTitle: main ? main.title : "Alles erledigt 🎉",
     dHeroTime: main ? (projOf(main.proj).name + " · " + main.zeit) : "Genieß den freien Kopf.",
     dHeuteCount: list.length ? `${openCount} offen von ${list.length}` : "",
+    dStatTasksFrac: tasksFrac,
+    dStatGoalsNum: goalsFrac,
   };
   Object.keys(dEls).forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent = dEls[id]; });
   const dTodayList = document.getElementById('dTodayList');
