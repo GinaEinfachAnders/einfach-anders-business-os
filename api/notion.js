@@ -7,6 +7,7 @@ const DS = {
   ideas: "78ed69fe-9f4b-4b23-8e6a-6ace0243bba1",
   finance: "142a4e13-03b2-43cd-88f7-3f52b9407900",
   goal: "e382d350-dd30-44f5-bc38-f53194cc78be",
+  scripts: "97306283-80bc-4144-8c71-fe01de9ac38e",
 };
 
 async function notion(path, opts = {}) {
@@ -32,6 +33,7 @@ function selectName(prop) { return (prop && prop.select && prop.select.name) || 
 function dateStart(prop) { return (prop && prop.date && prop.date.start) || null; }
 function numberVal(prop) { return typeof (prop && prop.number) === 'number' ? prop.number : 0; }
 function relationIds(prop) { return (prop && prop.relation || []).map(r => r.id); }
+function checkboxVal(prop) { return !!(prop && prop.checkbox); }
 
 async function queryAll(dsId, body = {}) {
   let results = [], cursor;
@@ -51,12 +53,13 @@ module.exports = async (req, res) => {
     if (!TOKEN) { res.status(500).json({ error: "NOTION_TOKEN fehlt (Vercel Umgebungsvariable setzen)" }); return; }
 
     if (req.method === 'GET') {
-      const [projPages, taskPages, ideaPages, finPages, goalPages] = await Promise.all([
+      const [projPages, taskPages, ideaPages, finPages, goalPages, scriptPages] = await Promise.all([
         queryAll(DS.projects),
         queryAll(DS.tasks),
         queryAll(DS.ideas),
         queryAll(DS.finance),
         queryAll(DS.goal),
+        queryAll(DS.scripts),
       ]);
 
       const projects = projPages.map(p => ({
@@ -105,7 +108,17 @@ module.exports = async (req, res) => {
         current: numberVal(goalPage.properties['Aktuell gespart']),
       } : null;
 
-      res.status(200).json({ projects, tasks, ideas, finance, goal });
+      const scripts = scriptPages
+        .filter(p => !checkboxVal(p.properties['Gedreht']))
+        .map(p => ({
+          id: p.id,
+          text: titleText(p.properties['Titel']),
+          cat: selectName(p.properties['Säule']) || 'Sonstiges',
+          herkunft: selectName(p.properties['Herkunft']),
+          hook: textText(p.properties['Hook']),
+        }));
+
+      res.status(200).json({ projects, tasks, ideas, finance, goal, scripts });
       return;
     }
 
@@ -183,6 +196,33 @@ module.exports = async (req, res) => {
           });
         }
         res.status(200).json({ ok: true, id: page.id }); return;
+      }
+
+      if (action === 'createScript') {
+        const page = await notion(`pages`, {
+          method: 'POST',
+          body: JSON.stringify({
+            parent: { type: 'data_source_id', data_source_id: DS.scripts },
+            properties: {
+              'Titel': { title: [{ text: { content: body.text } }] },
+              'Säule': { select: { name: body.cat } },
+            },
+          }),
+        });
+        res.status(200).json({ ok: true, id: page.id }); return;
+      }
+
+      if (action === 'completeScript') {
+        await notion(`pages/${body.id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ properties: { 'Gedreht': { checkbox: true } } }),
+        });
+        res.status(200).json({ ok: true }); return;
+      }
+
+      if (action === 'deleteScript') {
+        await notion(`pages/${body.id}`, { method: 'PATCH', body: JSON.stringify({ archived: true }) });
+        res.status(200).json({ ok: true }); return;
       }
 
       res.status(400).json({ error: 'unknown action' }); return;

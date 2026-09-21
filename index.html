@@ -746,10 +746,10 @@ const QUOTES = [
 ];
 
 const IDEA_CATS = ["Reel","TikTok","OF","Business","Song","YouTube","KI","Produkt"];
-const SCRIPT_CATS = ["Reel","TikTok","OnlyFans","BestFans","YouTube","Cam","Sonstiges"];
+const SCRIPT_CATS = ["Bier-Humor","Männer/Frauen-Humor","Veganer-Humor","POV","Attraction","Kommentar-Magnet"];
 
 function loadData(){
-  let raw = localStorage.getItem('bos_data_v11');
+  let raw = localStorage.getItem('bos_data_v12');
   if(raw){ try{ return JSON.parse(raw); }catch(e){} }
   return { tasks: DEFAULT_TASKS, finance: [], ideas: [], scripts: [],
     monthGoals: [
@@ -766,7 +766,7 @@ if(!DATA.monthGoals) DATA.monthGoals = [
   {id:"g2", text:"Mehr Follower", done:false},
   {id:"g3", text:"Mehr Freiheit ♡", done:false}
 ];
-function save(){ localStorage.setItem('bos_data_v11', JSON.stringify(DATA)); }
+function save(){ localStorage.setItem('bos_data_v12', JSON.stringify(DATA)); }
 
 // ---- Notion sync (via serverless proxy at /api/notion, secured with a server-side token) ----
 const NOTION_ENABLED = true;
@@ -786,6 +786,7 @@ async function syncFromNotion(){
     if(data.ideas) DATA.ideas = data.ideas.map(i=>({ id:i.id, text:i.text, cat:i.cat, date:i.date }));
     if(data.finance) DATA.finance = data.finance.map(f=>({ id:f.id, title:f.title, typ:f.typ, betrag:f.betrag, date:f.date }));
     if(data.goal){ DATA.goal = { name:data.goal.name, target:data.goal.target, current:data.goal.current }; NOTION_GOAL_ID = data.goal.id; }
+    if(data.scripts) DATA.scripts = data.scripts.map(s=>({ id:s.id, text:s.text, cat:s.cat }));
     save();
     return true;
   } catch(e){ console.warn('Notion-Sync fehlgeschlagen, nutze lokale Daten.', e); return false; }
@@ -1112,7 +1113,7 @@ function attachSwipeHandlers(){
       if(dx < -70){
         el.style.transform = `translateX(-110%)`;
         const row = el.closest('.script-row'); row.classList.add('done');
-        setTimeout(()=>{ DATA.scripts = DATA.scripts.filter(s=>s.id!==id); save(); renderSkripte(); }, 260);
+        setTimeout(()=>{ DATA.scripts = DATA.scripts.filter(s=>s.id!==id); save(); renderSkripte(); if(isNotionId(id)) notionCall('completeScript',{id}); }, 260);
       } else {
         el.style.transform = 'translateX(0)';
       }
@@ -1166,7 +1167,7 @@ document.addEventListener('click', (e)=>{
   const scriptcat = e.target.closest('[data-scriptcat]');
   if(scriptcat){ selectedScriptCat = scriptcat.dataset.scriptcat; renderSkripte(); return; }
   const delscript = e.target.closest('[data-delscript]');
-  if(delscript){ DATA.scripts = DATA.scripts.filter(x=>x.id!==delscript.dataset.delscript); save(); renderSkripte(); return; }
+  if(delscript){ const id=delscript.dataset.delscript; DATA.scripts = DATA.scripts.filter(x=>x.id!==id); save(); renderSkripte(); if(isNotionId(id)) notionCall('deleteScript',{id}); return; }
   const mg = e.target.closest('[data-mg]');
   if(mg){ const g = DATA.monthGoals.find(x=>x.id===mg.dataset.mg); g.done = !g.done; save(); renderHeute(); return; }
   const calnav = e.target.closest('[data-calnav]');
@@ -1208,10 +1209,18 @@ document.getElementById('ideaInput').addEventListener('keydown', async (e)=>{
   }
 });
 
-document.getElementById('scriptInput').addEventListener('keydown', (e)=>{
+document.getElementById('scriptInput').addEventListener('keydown', async (e)=>{
   if(e.key==='Enter' && e.target.value.trim()){
-    DATA.scripts.push({id:'sc'+Date.now(), text:e.target.value.trim(), cat:selectedScriptCat, date:isoDate(new Date())});
+    const text = e.target.value.trim(), cat = selectedScriptCat;
     e.target.value='';
+    let id = 'sc'+Date.now();
+    if(NOTION_ENABLED){
+      try{
+        const res = await fetch('/api/notion', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'createScript', text, cat})});
+        const j = await res.json(); if(j.id) id = j.id;
+      } catch(err){ console.warn('Notion-Skript konnte nicht angelegt werden', err); }
+    }
+    DATA.scripts.push({id, text, cat});
     save(); renderSkripte();
   }
 });
